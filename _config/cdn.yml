@@ -1,0 +1,10 @@
+---
+Name: CDNrequestprocessors
+After:
+  - requestprocessors
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        CustomMiddleware: %$DorsetDigital\CDNRewrite\CDNMiddleware
