@@ -64,7 +64,7 @@ class CDNMiddleware implements HTTPMiddleware
  /**
   * Process the request
   * @param HTTPRequest $request
-  * @param \DorsetDigital\CDNRewrite\callable $delegate
+  * @param $delegate
   * @return
   */
  public function process(HTTPRequest $request, callable $delegate)
@@ -73,10 +73,13 @@ class CDNMiddleware implements HTTPMiddleware
   $response = $delegate($request);
 
   if ($this->canRun() === true) {
-   $body = $response->getBody();
-   $this->updateBody($body, $response);
-   $response->setBody($body);
    $response->addHeader('X-CDN', 'Enabled');
+
+   if (substr($request->getURL(), 0, 6) !== 'admin/') {
+    $body = $response->getBody();
+    $this->updateBody($body, $response);
+    $response->setBody($body);
+   }
 
    if ($this->config()->get('add_debug_headers') == true) {
     $response->addHeader('X-CDN-Domain', $this->config()->get('cdn_domain'));
@@ -90,7 +93,7 @@ class CDNMiddleware implements HTTPMiddleware
  {
   $confEnabled = $this->config()->get('cdn_rewrite');
   $devEnabled = ((!Director::isDev()) || ($this->config()->get('enable_in_dev')));
-  
+
   return ($confEnabled && $devEnabled);
  }
 
