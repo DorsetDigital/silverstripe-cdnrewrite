@@ -18,7 +18,7 @@ Provides a simple method of rewriting the URLs of assets and resources to allow 
 
 # Usage
 
-The module won't make any changes to your site unless you do a bit of configuration.  There are a few options to set, done in a yml file:
+The module won't make any changes to your site unless you do a bit of configuration.  There are a few options you can set, done in a yml file:
 
 
 ```yaml
@@ -33,6 +33,7 @@ DorsetDigital\CDNRewrite\CDNMiddleware:
   rewrite_resources: true
   add_debug_headers: true
   enable_in_dev: true
+  subdirectory: ''
 ```
 
 The options are hopefully fairly self explanatory:
@@ -43,6 +44,7 @@ The options are hopefully fairly self explanatory:
 * `rewrite_resources` - whether to rewrite references to the 'resources' directory (default false)
 * `add_debug_headers` - if enabled, adds extra HTML headers to show the various operations being applied (default false)
 * `enable_in_dev` - enable the CDN in dev mode (default false)
+* `subdirectory` - set this if your site is in a subdirectory (eg. for http://www.example.com/silverstripe - set this to 'silverstripe')
 
 # Notes
 

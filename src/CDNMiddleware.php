@@ -6,6 +6,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Control\Director;
+use SilverStripe\Admin\AdminRootController;
 
 class CDNMiddleware implements HTTPMiddleware
 {
@@ -62,6 +63,14 @@ class CDNMiddleware implements HTTPMiddleware
  private static $add_debug_headers = false;
 
  /**
+  * @config
+  *
+  * Subdirectory name for the site
+  * @var string
+  */
+ private static $subdirectory = '';
+
+ /**
   * Process the request
   * @param HTTPRequest $request
   * @param $delegate
@@ -75,7 +84,7 @@ class CDNMiddleware implements HTTPMiddleware
   if ($this->canRun() === true) {
    $response->addHeader('X-CDN', 'Enabled');
 
-   if (substr($request->getURL(), 0, 6) !== 'admin/') {
+   if ($this->getIsAdmin($request) === false) {
     $body = $response->getBody();
     $this->updateBody($body, $response);
     $response->setBody($body);
@@ -83,6 +92,7 @@ class CDNMiddleware implements HTTPMiddleware
 
    if ($this->config()->get('add_debug_headers') == true) {
     $response->addHeader('X-CDN-Domain', $this->config()->get('cdn_domain'));
+    $response->addHeader('X-CDN-Dir', $this->getSubdirectory());
    }
   }
 
@@ -100,23 +110,24 @@ class CDNMiddleware implements HTTPMiddleware
  private function updateBody(&$body, &$response)
  {
   $cdn = $this->config()->get('cdn_domain');
+  $subDir = $this->getSubdirectory();
 
   if ($this->config()->get('rewrite_assets') === true) {
 
    $search = [
-       'src="assets/',
-       'src="/assets/',
-       'src=\"/assets/',
-       'href="/assets/',
+       'src="' . $subDir . 'assets/',
+       'src="/' . $subDir . 'assets/',
+       'src=\"/' . $subDir . 'assets/',
+       'href="/' . $subDir . 'assets/',
        Director::absoluteBaseURL() . 'assets/'
    ];
 
    $replace = [
-       'src="' . $cdn . '/assets/',
-       'src="' . $cdn . '/assets/',
-       'src=\"' . $cdn . '/assets/',
-       'href="' . $cdn . '/assets/',
-       $cdn . '/assets/'
+       'src="' . $cdn . '/' . $subDir . 'assets/',
+       'src="' . $cdn . '/' . $subDir . 'assets/',
+       'src=\"' . $cdn . '/' . $subDir . 'assets/',
+       'href="' . $cdn . '/' . $subDir . 'assets/',
+       $cdn . '/' . $subDir . 'assets/'
    ];
 
    $body = str_replace($search, $replace, $body);
@@ -148,5 +159,34 @@ class CDNMiddleware implements HTTPMiddleware
     $response->addHeader('X-CDN-Resources', 'Enabled');
    }
   }
+ }
+
+ private function getSubdirectory()
+ {
+  $subDir = trim($this->config()->get('subdirectory'), '/');
+  if ($subDir != "") {
+   $subDir = $subDir . '/';
+  }
+  return $subDir;
+ }
+
+ /**
+  * Determine whether the website is being viewed from an admin protected area or not
+  * (shamelessly stolen from https://github.com/silverstripe/silverstripe-subsites)
+  *
+  * @param  HTTPRequest $request
+  * @return bool
+  */
+ private function getIsAdmin(HTTPRequest $request)
+ {
+  $adminPaths = static::config()->get('admin_url_paths');
+  $adminPaths[] = AdminRootController::config()->get('url_base') . '/';
+  $currentPath = rtrim($request->getURL(), '/') . '/';
+  foreach ($adminPaths as $adminPath) {
+   if (substr($currentPath, 0, strlen($adminPath)) === $adminPath) {
+    return true;
+   }
+  }
+  return false;
  }
 }
