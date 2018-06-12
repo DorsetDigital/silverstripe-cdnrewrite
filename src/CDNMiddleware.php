@@ -81,7 +81,7 @@ class CDNMiddleware implements HTTPMiddleware
 
   $response = $delegate($request);
 
-  if ($this->canRun() === true) {
+  if (($this->canRun() === true) && ($response !== null)) {
    $response->addHeader('X-CDN', 'Enabled');
 
    if ($this->getIsAdmin($request) === false) {
