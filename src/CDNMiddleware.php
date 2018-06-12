@@ -148,7 +148,7 @@ class CDNMiddleware implements HTTPMiddleware
    
    if ($this->config()->get('add_prefetch') === true) {
      $prefetchTag = $this->getPrefetchTag();
-     $body = str_replace('<head>', "<head>".$prefetchTag, $body);
+     $body = str_replace('<head>', "<head>" . $prefetchTag, $body);
      if ($this->config()->get('add_debug_headers') == true) {
        $response->addHeader('X-CDN-Prefetch', 'Enabled');
      }       
@@ -209,7 +209,7 @@ class CDNMiddleware implements HTTPMiddleware
  private function getIsAdmin(HTTPRequest $request)
  {
   $adminPaths = static::config()->get('admin_url_paths');
-  $adminPaths[] = AdminRootController::config()->get('url_base') . '/';
+  $adminPaths[ ] = AdminRootController::config()->get('url_base') . '/';
   $currentPath = rtrim($request->getURL(), '/') . '/';
   foreach ($adminPaths as $adminPath) {
    if (substr($currentPath, 0, strlen($adminPath)) === $adminPath) {
