@@ -7,6 +7,7 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Control\Director;
 use SilverStripe\Admin\AdminRootController;
+use SilverStripe\View\HTML;
 
 class CDNMiddleware implements HTTPMiddleware
 {
@@ -70,6 +71,15 @@ class CDNMiddleware implements HTTPMiddleware
   */
  private static $subdirectory = '';
 
+ /**
+  * @config
+  * 
+  * Add dns-prefetch links to the html head
+  * @var boolean
+  */
+ private static $add_prefetch = false;
+ 
+ 
  /**
   * Process the request
   * @param HTTPRequest $request
@@ -135,6 +145,14 @@ class CDNMiddleware implements HTTPMiddleware
    if ($this->config()->get('add_debug_headers') == true) {
     $response->addHeader('X-CDN-Assets', 'Enabled');
    }
+   
+   if ($this->config()->get('add_prefetch') === true) {
+     $prefetchTag = $this->getPrefetchTag();
+     $body = str_replace('<head>', "<head>".$prefetchTag, $body);
+     if ($this->config()->get('add_debug_headers') == true) {
+       $response->addHeader('X-CDN-Prefetch', 'Enabled');
+     }       
+   }
   }
 
   if ($this->config()->get('rewrite_resources') === true) {
@@ -168,6 +186,17 @@ class CDNMiddleware implements HTTPMiddleware
    $subDir = $subDir . '/';
   }
   return $subDir;
+ }
+ 
+ private function getPrefetchTag() 
+ {
+   $atts = [
+     'rel' => 'dns-prefetch',
+     'href' => $this->config()->get('cdn_domain')
+   ];
+   $pfTag = "\n" . HTML::createTag('link', $atts);
+        
+   return $pfTag;
  }
 
  /**
