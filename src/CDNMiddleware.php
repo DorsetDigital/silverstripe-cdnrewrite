@@ -58,6 +58,14 @@ class CDNMiddleware implements HTTPMiddleware
  /**
   * @config
   *
+  * should themes also be rewritten?
+  * @var bool
+  */
+ private static $rewrite_themes = false;
+
+ /**
+  * @config
+  *
   * Add debug headers for each operation
   * @var bool
   */
@@ -73,13 +81,12 @@ class CDNMiddleware implements HTTPMiddleware
 
  /**
   * @config
-  * 
+  *
   * Add dns-prefetch links to the html head
   * @var boolean
   */
  private static $add_prefetch = false;
- 
- 
+
  /**
   * Process the request
   * @param HTTPRequest $request
@@ -119,63 +126,115 @@ class CDNMiddleware implements HTTPMiddleware
 
  private function updateBody(&$body, &$response)
  {
-  $cdn = $this->config()->get('cdn_domain');
-  $subDir = $this->getSubdirectory();
 
   if ($this->config()->get('rewrite_assets') === true) {
-
-   $search = [
-       'src="' . $subDir . 'assets/',
-       'src="/' . $subDir . 'assets/',
-       'src=\"/' . $subDir . 'assets/',
-       'href="/' . $subDir . 'assets/',
-       Director::absoluteBaseURL() . 'assets/'
-   ];
-
-   $replace = [
-       'src="' . $cdn . '/' . $subDir . 'assets/',
-       'src="' . $cdn . '/' . $subDir . 'assets/',
-       'src=\"' . $cdn . '/' . $subDir . 'assets/',
-       'href="' . $cdn . '/' . $subDir . 'assets/',
-       $cdn . '/' . $subDir . 'assets/'
-   ];
-
-   $body = str_replace($search, $replace, $body);
-
-   if ($this->config()->get('add_debug_headers') == true) {
-    $response->addHeader('X-CDN-Assets', 'Enabled');
-   }
-   
-   if ($this->config()->get('add_prefetch') === true) {
-     $prefetchTag = $this->getPrefetchTag();
-     $body = str_replace('<head>', "<head>" . $prefetchTag, $body);
-     if ($this->config()->get('add_debug_headers') == true) {
-       $response->addHeader('X-CDN-Prefetch', 'Enabled');
-     }       
-   }
+   $this->rewriteAssets($body, $response);
   }
 
   if ($this->config()->get('rewrite_resources') === true) {
+   $this->rewriteResources($body, $response);
+  }
 
-   $search = [
-       'src="/resources/',
-       'src="' . Director::absoluteBaseURL() . 'resources/',
-       'href="/resources/',
-       'href="' . Director::absoluteBaseURL() . 'resources/'
-   ];
+  if ($this->config()->get('rewrite_themes') === true) {
+   $this->rewriteThemes($body, $response);
+  }
 
-   $replace = [
-       'src="' . $cdn . '/resources/',
-       'src="' . $cdn . '/resources/',
-       'href="' . $cdn . '/resources/',
-       'href="' . $cdn . '/resources/'
-   ];
+  if ($this->config()->get('add_prefetch') === true) {
+   $this->addPrefetch($body, $response);
+  }
+ }
 
-   $body = str_replace($search, $replace, $body);
+ private function rewriteAssets(&$body, &$response)
+ {
 
-   if ($this->config()->get('add_debug_headers') == true) {
-    $response->addHeader('X-CDN-Resources', 'Enabled');
-   }
+  $cdn = $this->config()->get('cdn_domain');
+  $subDir = $this->getSubdirectory();
+
+  $search = [
+      'src="' . $subDir . 'assets/',
+      'src="/' . $subDir . 'assets/',
+      'src=\"/' . $subDir . 'assets/',
+      'href="/' . $subDir . 'assets/',
+      Director::absoluteBaseURL() . 'assets/'
+  ];
+
+  $replace = [
+      'src="' . $cdn . '/' . $subDir . 'assets/',
+      'src="' . $cdn . '/' . $subDir . 'assets/',
+      'src=\"' . $cdn . '/' . $subDir . 'assets/',
+      'href="' . $cdn . '/' . $subDir . 'assets/',
+      $cdn . '/' . $subDir . 'assets/'
+  ];
+
+  $body = str_replace($search, $replace, $body);
+
+  if ($this->config()->get('add_debug_headers') == true) {
+   $response->addHeader('X-CDN-Assets', 'Enabled');
+  }
+ }
+
+ private function rewriteThemes(&$body, &$response)
+ {
+
+  $cdn = $this->config()->get('cdn_domain');
+  $subDir = $this->getSubdirectory();
+
+  $search = [
+      'src="' . $subDir . 'themes/',
+      'src="/' . $subDir . 'themes/',
+      'src=\"/' . $subDir . 'themes/',
+      'href="/' . $subDir . 'themes/',
+      Director::absoluteBaseURL() . 'themes/'
+  ];
+
+  $replace = [
+      'src="' . $cdn . '/' . $subDir . 'themes/',
+      'src="' . $cdn . '/' . $subDir . 'themes/',
+      'src=\"' . $cdn . '/' . $subDir . 'themes/',
+      'href="' . $cdn . '/' . $subDir . 'themes/',
+      $cdn . '/' . $subDir . 'themes/'
+  ];
+
+  $body = str_replace($search, $replace, $body);
+
+  if ($this->config()->get('add_debug_headers') == true) {
+   $response->addHeader('X-CDN-Themes', 'Enabled');
+  }
+ }
+
+ private function rewriteResources(&$body, &$response)
+ {
+
+  $cdn = $this->config()->get('cdn_domain');
+  $subDir = $this->getSubdirectory();
+
+  $search = [
+      'src="/' . $subDir . 'resources/',
+      'src="' . Director::absoluteBaseURL() . $subDir . 'resources/',
+      'href="/' . $subDir . 'resources/',
+      'href="' . Director::absoluteBaseURL() . $subDir . 'resources/'
+  ];
+
+  $replace = [
+      'src="' . $cdn . '/' . $subDir . 'resources/',
+      'src="' . $cdn . '/' . $subDir . 'resources/',
+      'href="' . $cdn . '/' . $subDir . 'resources/',
+      'href="' . $cdn . '/' . $subDir . 'resources/'
+  ];
+
+  $body = str_replace($search, $replace, $body);
+
+  if ($this->config()->get('add_debug_headers') == true) {
+   $response->addHeader('X-CDN-Resources', 'Enabled');
+  }
+ }
+
+ private function addPrefetch(&$body, &$response)
+ {
+  $prefetchTag = $this->getPrefetchTag();
+  $body = str_replace('<head>', "<head>" . $prefetchTag, $body);
+  if ($this->config()->get('add_debug_headers') == true) {
+   $response->addHeader('X-CDN-Prefetch', 'Enabled');
   }
  }
 
@@ -187,16 +246,16 @@ class CDNMiddleware implements HTTPMiddleware
   }
   return $subDir;
  }
- 
- private function getPrefetchTag() 
+
+ private function getPrefetchTag()
  {
-   $atts = [
-     'rel' => 'dns-prefetch',
-     'href' => $this->config()->get('cdn_domain')
-   ];
-   $pfTag = "\n" . HTML::createTag('link', $atts);
-        
-   return $pfTag;
+  $atts = [
+      'rel' => 'dns-prefetch',
+      'href' => $this->config()->get('cdn_domain')
+  ];
+  $pfTag = "\n" . HTML::createTag('link', $atts);
+
+  return $pfTag;
  }
 
  /**
@@ -209,7 +268,7 @@ class CDNMiddleware implements HTTPMiddleware
  private function getIsAdmin(HTTPRequest $request)
  {
   $adminPaths = static::config()->get('admin_url_paths');
-  $adminPaths[ ] = AdminRootController::config()->get('url_base') . '/';
+  $adminPaths[] = AdminRootController::config()->get('url_base') . '/';
   $currentPath = rtrim($request->getURL(), '/') . '/';
   foreach ($adminPaths as $adminPath) {
    if (substr($currentPath, 0, strlen($adminPath)) === $adminPath) {

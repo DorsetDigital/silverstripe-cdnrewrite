@@ -43,6 +43,7 @@ The options are hopefully fairly self explanatory:
 * `cdn_domain` - the full domain name of the CDN (required to enable module)
 * `rewrite_assets` - whether to rewrite references to the 'assets' directory (default false)
 * `rewrite_resources` - whether to rewrite references to the 'resources' directory (default false)
+* `rewrite_themes` - whether to rewrite references to the 'themes' directory (default false)
 * `add_debug_headers` - if enabled, adds extra HTML headers to show the various operations being applied (default false)
 * `enable_in_dev` - enable the CDN in dev mode (default false)
 * `subdirectory` - set this if your site is in a subdirectory (eg. for http://www.example.com/silverstripe - set this to 'silverstripe')
