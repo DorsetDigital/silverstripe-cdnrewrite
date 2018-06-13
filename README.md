@@ -31,6 +31,7 @@ DorsetDigital\CDNRewrite\CDNMiddleware:
   cdn_domain: 'https://cdn.example.com'
   rewrite_assets: true
   rewrite_resources: true
+  rewrite_themes: true
   add_debug_headers: true
   enable_in_dev: true
   subdirectory: ''
