@@ -7,4 +7,4 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\Control\Director:
     properties:
       Middlewares:
-        CustomMiddleware: %$DorsetDigital\CDNRewrite\CDNMiddleware
+        CustomCDNMiddleware: %$DorsetDigital\CDNRewrite\CDNMiddleware
