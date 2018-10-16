@@ -260,21 +260,18 @@ class CDNMiddleware implements HTTPMiddleware
 
  /**
   * Determine whether the website is being viewed from an admin protected area or not
-  * (shamelessly stolen from https://github.com/silverstripe/silverstripe-subsites)
+  * (shamelessly based on https://github.com/silverstripe/silverstripe-subsites)
   *
   * @param  HTTPRequest $request
   * @return bool
   */
  private function getIsAdmin(HTTPRequest $request)
  {
-  $adminPaths = static::config()->get('admin_url_paths');
-  $adminPaths[] = AdminRootController::config()->get('url_base') . '/';
+  $adminPath = AdminRootController::admin_url();
   $currentPath = rtrim($request->getURL(), '/') . '/';
-  foreach ($adminPaths as $adminPath) {
    if (substr($currentPath, 0, strlen($adminPath)) === $adminPath) {
     return true;
    }
-  }
   return false;
  }
 }
