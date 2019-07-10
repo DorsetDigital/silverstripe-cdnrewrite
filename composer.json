@@ -1,5 +1,5 @@
 {
- "name": "dorsetdigital/silverstripe-cdnrewrite",
+ "name": "springload/silverstripe-cdnrewrite",
  "description": "Automatically rewrites the URLs of media and assets to use a CDN",
  "type": "silverstripe-vendormodule",
  "homepage": "https://github.com/DorsetDigital/silverstripe-cdnrewrite",

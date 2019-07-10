@@ -35,6 +35,7 @@ DorsetDigital\CDNRewrite\CDNMiddleware:
   add_debug_headers: true
   enable_in_dev: true
   subdirectory: ''
+  cdnpath: ''
   add_prefetch: true
 ```
 
@@ -48,6 +49,7 @@ The options are hopefully fairly self explanatory:
 * `add_debug_headers` - if enabled, adds extra HTML headers to show the various operations being applied (default false)
 * `enable_in_dev` - enable the CDN in dev mode (default false)
 * `subdirectory` - set this if your site is in a subdirectory (eg. for http://www.example.com/silverstripe - set this to 'silverstripe')
+* `cdnpath` - arb path on cdn
 * `add_prefetch` - set this to true if you want the module to automatically add a `<link rel="dns-prefetch">` tag to your html head to improve performance
 
 # Notes

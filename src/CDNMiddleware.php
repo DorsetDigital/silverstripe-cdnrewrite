@@ -82,6 +82,15 @@ class CDNMiddleware implements HTTPMiddleware
  /**
   * @config
   *
+  * CDN Path prefix
+  * @var string
+  */
+  private static $cdnpath = '';
+
+
+ /**
+  * @config
+  *
   * Add dns-prefetch links to the html head
   * @var boolean
   */
@@ -149,6 +158,7 @@ class CDNMiddleware implements HTTPMiddleware
 
   $cdn = $this->config()->get('cdn_domain');
   $subDir = $this->getSubdirectory();
+  $cdnPath = $this->getCdnPath();
 
   $search = [
       'src="' . $subDir . 'assets/',
@@ -159,11 +169,11 @@ class CDNMiddleware implements HTTPMiddleware
   ];
 
   $replace = [
-      'src="' . $cdn . '/' . $subDir . 'assets/',
-      'src="' . $cdn . '/' . $subDir . 'assets/',
-      'src=\"' . $cdn . '/' . $subDir . 'assets/',
-      'href="' . $cdn . '/' . $subDir . 'assets/',
-      $cdn . '/' . $subDir . 'assets/'
+      'src="' . $cdn . '/' . $cdnPath . $subDir . 'assets/',
+      'src="' . $cdn . '/' . $cdnPath . $subDir . 'assets/',
+      'src=\"' . $cdn . '/' . $cdnPath . $subDir . 'assets/',
+      'href="' . $cdn . '/' . $cdnPath . $subDir . 'assets/',
+      $cdn . '/' . $cdnPath . $subDir . 'assets/'
   ];
 
   $body = str_replace($search, $replace, $body);
@@ -178,6 +188,7 @@ class CDNMiddleware implements HTTPMiddleware
 
   $cdn = $this->config()->get('cdn_domain');
   $subDir = $this->getSubdirectory();
+  $cdnPath = $this->getCdnPath();
 
   $search = [
       'src="' . $subDir . 'themes/',
@@ -188,11 +199,11 @@ class CDNMiddleware implements HTTPMiddleware
   ];
 
   $replace = [
-      'src="' . $cdn . '/' . $subDir . 'themes/',
-      'src="' . $cdn . '/' . $subDir . 'themes/',
-      'src=\"' . $cdn . '/' . $subDir . 'themes/',
-      'href="' . $cdn . '/' . $subDir . 'themes/',
-      $cdn . '/' . $subDir . 'themes/'
+      'src="' . $cdn . '/' . $cdnPath . $subDir . 'themes/',
+      'src="' . $cdn . '/' . $cdnPath . $subDir . 'themes/',
+      'src=\"' . $cdn . '/' . $cdnPath . $subDir . 'themes/',
+      'href="' . $cdn . '/' . $cdnPath . $subDir . 'themes/',
+      $cdn . '/' . $cdnPath . $subDir . 'themes/'
   ];
 
   $body = str_replace($search, $replace, $body);
@@ -207,6 +218,7 @@ class CDNMiddleware implements HTTPMiddleware
 
   $cdn = $this->config()->get('cdn_domain');
   $subDir = $this->getSubdirectory();
+  $cdnPath = $this->getCdnPath();
 
   $search = [
       'src="/' . $subDir . 'resources/',
@@ -216,10 +228,10 @@ class CDNMiddleware implements HTTPMiddleware
   ];
 
   $replace = [
-      'src="' . $cdn . '/' . $subDir . 'resources/',
-      'src="' . $cdn . '/' . $subDir . 'resources/',
-      'href="' . $cdn . '/' . $subDir . 'resources/',
-      'href="' . $cdn . '/' . $subDir . 'resources/'
+      'src="' . $cdn . '/' . $cdnPath . $subDir . 'resources/',
+      'src="' . $cdn . '/' . $cdnPath . $subDir . 'resources/',
+      'href="' . $cdn . '/' . $cdnPath . $subDir . 'resources/',
+      'href="' . $cdn . '/' . $cdnPath . $subDir . 'resources/'
   ];
 
   $body = str_replace($search, $replace, $body);
@@ -245,6 +257,15 @@ class CDNMiddleware implements HTTPMiddleware
    $subDir = $subDir . '/';
   }
   return $subDir;
+ }
+
+ private function getCdnPath()
+ {
+    $cdnPath = trim($this->config()->get('cdnpath'), '/');
+  if ($cdnPath != "") {
+   $cdnPath = $cdnPath . '/';
+  }
+  return $cdnPath;
  }
 
  private function getPrefetchTag()
