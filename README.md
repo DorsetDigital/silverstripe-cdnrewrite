@@ -16,7 +16,7 @@ See the configuration notes below for an example of how to set this module up.
 *Silverstripe 4.x
 
 # Installation
-* Install the code with `composer require dorsetdigital/silverstripe-cdnrewrite`
+* Install the code with `composer require dorsetdigital/silverstripe-cdnrewrite "^2"`
 * Run a `dev/build?flush` to update your project
 
 # Usage
