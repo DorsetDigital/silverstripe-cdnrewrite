@@ -8,6 +8,9 @@ Provides a simple method of rewriting the URLs of assets and resources to allow 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE.md)
 [![Version](http://img.shields.io/packagist/v/dorsetdigital/silverstripe-cdnrewrite.svg?style=flat)](https://packagist.org/packages/dorsetdigital/silverstripe-cdnrewrite)
 
+# V2
+Please note, the V2 branch introduces a new configuration syntax.  If you are using V1 of the module, you will need to change this before it will work correctly.
+See the configuration notes below for an example of how to set this module up.
 
 # Requirements
 *Silverstripe 4.x
@@ -29,26 +32,24 @@ Name: cdnconfig
 DorsetDigital\CDNRewrite\CDNMiddleware:
   cdn_rewrite: true
   cdn_domain: 'https://cdn.example.com'
-  rewrite_assets: true
-  rewrite_resources: true
-  rewrite_themes: true
   add_debug_headers: true
   enable_in_dev: true
   subdirectory: ''
   add_prefetch: true
+  rewrites:
+    - '_resources'
+    - 'client'
 ```
 
 The options are hopefully fairly self explanatory:
 
 * `cdn_rewrite` - globally enables and disables the module (default false - disabled)
 * `cdn_domain` - the full domain name of the CDN (required to enable module)
-* `rewrite_assets` - whether to rewrite references to the 'assets' directory (default false)
-* `rewrite_resources` - whether to rewrite references to the 'resources' directory (default false)
-* `rewrite_themes` - whether to rewrite references to the 'themes' directory (default false)
 * `add_debug_headers` - if enabled, adds extra HTML headers to show the various operations being applied (default false)
 * `enable_in_dev` - enable the CDN in dev mode (default false)
 * `subdirectory` - set this if your site is in a subdirectory (eg. for http://www.example.com/silverstripe - set this to 'silverstripe')
 * `add_prefetch` - set this to true if you want the module to automatically add a `<link rel="dns-prefetch">` tag to your html head to improve performance
+* `rewrites` - this is a list of the prefixes you wish to rewrite.  By default, CMS 4 exposes content in a _resources directory in the public structure, so you'll probably want that as a minimum.  You can add as many additional entires here as required.
 
 # Notes
 
