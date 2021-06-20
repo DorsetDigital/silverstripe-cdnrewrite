@@ -136,6 +136,7 @@ class CDNMiddleware implements HTTPMiddleware
                 'src="/' . $subDir . $cleanPrefix . '/',
                 'src=\"/' . $subDir . $cleanPrefix . '/',
                 'href="/' . $subDir . $cleanPrefix . '/',
+                'background-image: url(/' . $subDir . $cleanPrefix . '/',
                 Director::absoluteBaseURL() . $cleanPrefix . '/'
             ];
 
@@ -144,6 +145,7 @@ class CDNMiddleware implements HTTPMiddleware
                 'src="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 'src=\"' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 'href="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
+                'background-image: url(' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 $cdn . '/' . $subDir . $cleanPrefix . '/'
             ];
 
