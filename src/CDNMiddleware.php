@@ -124,6 +124,8 @@ class CDNMiddleware implements HTTPMiddleware
      */
     private function rewriteTags(&$body, &$response)
     {
+        $body = ($body ?: '');
+        
         $cdn = $this->config()->get('cdn_domain');
         $subDir = $this->getSubdirectory();
         $prefixes = $this->config()->get('rewrites');
