@@ -10,10 +10,6 @@
    "email": "tim@dorset-digital.net"
   }
  ], 
- "require": {
-  "silverstripe/vendor-plugin": "^1.0",
-  "silverstripe/cms": "^4.0"
- },
  "license": "BSD-3-Clause",
  "autoload": {
   "psr-4": {
