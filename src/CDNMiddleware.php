@@ -87,7 +87,7 @@ class CDNMiddleware implements HTTPMiddleware
 
             if ($this->getIsAdmin($request) === false) {
                 $body = $response->getBody();
-                $this->rewriteTags($body, $response);
+                $this->rewriteTags($body);
                 $this->addPrefetch($body, $response);
                 $response->setBody($body);
             }
@@ -122,8 +122,10 @@ class CDNMiddleware implements HTTPMiddleware
      * @param $body
      * @param $response
      */
-    private function rewriteTags(&$body, &$response)
+    private function rewriteTags(&$body)
     {
+        $body = ($body ?: '');
+
         $cdn = $this->config()->get('cdn_domain');
         $subDir = $this->getSubdirectory();
         $prefixes = $this->config()->get('rewrites');
@@ -136,6 +138,7 @@ class CDNMiddleware implements HTTPMiddleware
                 'src="/' . $subDir . $cleanPrefix . '/',
                 'src=\"/' . $subDir . $cleanPrefix . '/',
                 'href="/' . $subDir . $cleanPrefix . '/',
+                'background-image: url(/' . $subDir . $cleanPrefix . '/',
                 Director::absoluteBaseURL() . $cleanPrefix . '/'
             ];
 
@@ -144,6 +147,7 @@ class CDNMiddleware implements HTTPMiddleware
                 'src="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 'src=\"' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 'href="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
+                'background-image: url(' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 $cdn . '/' . $subDir . $cleanPrefix . '/'
             ];
 
@@ -154,6 +158,8 @@ class CDNMiddleware implements HTTPMiddleware
 
     private function addPrefetch(&$body, &$response)
     {
+        $body = ($body ?: '');
+
         if ($this->config()->get('add_prefetch') === true) {
             $prefetchTag = $this->getPrefetchTag();
             $body = str_replace('<head>', "<head>" . $prefetchTag, $body);
