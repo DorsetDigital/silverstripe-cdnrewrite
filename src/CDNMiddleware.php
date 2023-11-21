@@ -148,8 +148,11 @@ class CDNMiddleware implements HTTPMiddleware
                 'background-image: url(' . $cdn . '/' . $subDir . $cleanPrefix . '/',
                 $cdn . '/' . $subDir . $cleanPrefix . '/'
             ];
-
-            $body = str_replace($search, $replace, $body);
+            
+            if ($body)
+            {
+                $body = str_replace($search, $replace, $body);
+            }
         }
     }
 
