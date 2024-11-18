@@ -5,8 +5,10 @@ namespace DorsetDigital\CDNRewrite;
 use SilverStripe\Admin\AdminRootController;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\View\HTML;
 
@@ -15,6 +17,7 @@ class CDNMiddleware implements HTTPMiddleware
 
     use Injectable;
     use Configurable;
+    use Extensible;
 
     /**
      * @config
@@ -87,6 +90,7 @@ class CDNMiddleware implements HTTPMiddleware
     public function process(HTTPRequest $request, callable $delegate)
     {
         $response = $delegate($request);
+        $response->addHeader('X-CDN-Module', 'Installed');
 
         if (($response !== null) && ($this->canRun($request, $response) === true)) {
             $response->addHeader('X-CDN-Rewrites', 'Enabled');
@@ -113,13 +117,19 @@ class CDNMiddleware implements HTTPMiddleware
      * Check if we're OK to execute
      * @return bool
      */
-    private function canRun($request, $response)
+    private function canRun(HTTPRequest $request, HTTPResponse $response)
     {
         $confEnabled = $this->config()->get('cdn_rewrite');
         $devEnabled = ((!Director::isDev()) || ($this->config()->get('enable_in_dev')));
-        $inAdmin = $this->getIsAdmin($request);
-        $adminEnabled = !$inAdmin || ($this->config()->get('enable_in_preview'));
-        return ($confEnabled && $devEnabled && $adminEnabled);
+        $notAdmin = !$this->getIsAdmin($request);
+        $previewOK = true;
+        if ($request->getVar('CMSPreview') == 1) {
+            if (!$this->config()->get('enable_in_preview')) {
+                $previewOK = false;
+            }
+        }
+
+        return ($confEnabled && $devEnabled && $previewOK && $notAdmin);
     }
 
 
@@ -137,23 +147,24 @@ class CDNMiddleware implements HTTPMiddleware
         foreach ($prefixes as $prefix) {
             $cleanPrefix = trim($prefix, '/');
 
-            $search = [
-                'src="' . $subDir . $cleanPrefix . '/',
-                'src="/' . $subDir . $cleanPrefix . '/',
-                'src=\"/' . $subDir . $cleanPrefix . '/',
-                'href="/' . $subDir . $cleanPrefix . '/',
-                Director::absoluteBaseURL() . $cleanPrefix . '/'
+            $patterns = [
+                '/src=(["\'])?' . preg_quote('/' . $subDir . $cleanPrefix, '/') . '/i', // Match src attribute with optional quotes
+                '/href=(["\'])?' . preg_quote('/' . $subDir . $cleanPrefix, '/') . '/i', // Match href attribute with optional quotes
+                '/background-image:\s*url\((["\'])?\/?' . preg_quote($subDir . $cleanPrefix, '/') . '/i', // Match background-image with optional quotes and leading slash
+                '/' . preg_quote(Director::absoluteBaseURL() . $cleanPrefix, '/') . '/i' // Match absolute URL
             ];
 
-            $replace = [
-                'src="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
-                'src="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
-                'src=\"' . $cdn . '/' . $subDir . $cleanPrefix . '/',
-                'href="' . $cdn . '/' . $subDir . $cleanPrefix . '/',
-                $cdn . '/' . $subDir . $cleanPrefix . '/'
+            $replacements = [
+                'src=$1' . $cdn . '/' . $subDir . $cleanPrefix, // Use backreference to preserve matching quote style
+                'href=$1' . $cdn . '/' . $subDir . $cleanPrefix, // Use backreference to preserve matching quote style
+                'background-image: url($1' . $cdn . '/' . $subDir . $cleanPrefix, // Use backreference for quotes
+                $cdn . '/' . $subDir . $cleanPrefix // Replace absolute URL
             ];
 
-            $body = str_replace($search, $replace, $body);
+            $this->extend('updateRewriteSearch', $patterns);
+            $this->extend('updateRewriteReplacements', $replacements);
+
+            $body = preg_replace($patterns, $replacements, $body);
         }
     }
 

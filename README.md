@@ -57,6 +57,7 @@ The options are hopefully fairly self explanatory:
 
 * The module is disabled in the CMS / admin system unless explicitly enabled with the setting above, so rewrites do not currently happen here
 * When enabled, the module will always add an HTTP header of `X-CDN: Enabled` to show that it's working, even if none of the other rewrite operations are carried out.  If this is not present and you think it should be, ensure that you have set `cdn_rewrite` to true, that you have specified the `cdn_domain` in your config file and that you have `enable_in_dev` set to true if you are testing in dev mode.
+* Extension points are provided in the middleware to allow you to override the search patterns and replacemnts.  See the source code for details.  (Beware - this can break your site!)
 
 # Need help?
 
