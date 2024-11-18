@@ -41,6 +41,12 @@ class CDNMiddleware implements HTTPMiddleware
     private static $enable_in_dev = false;
 
     /**
+     * Enable in CMS preview
+     * @var bool
+     */
+    private static $enable_in_preview = false;
+
+    /**
      * @config
      *
      * Add debug headers for each operation
@@ -82,15 +88,13 @@ class CDNMiddleware implements HTTPMiddleware
     {
         $response = $delegate($request);
 
-        if (($this->canRun() === true) && ($response !== null)) {
+        if (($response !== null) && ($this->canRun($request, $response) === true)) {
             $response->addHeader('X-CDN-Rewrites', 'Enabled');
 
-            if ($this->getIsAdmin($request) === false) {
-                $body = $response->getBody();
-                $this->rewriteTags($body, $response);
-                $this->addPrefetch($body, $response);
-                $response->setBody($body);
-            }
+            $body = $response->getBody() ?: '';
+            $this->rewriteTags($body, $response);
+            $this->addPrefetch($body, $response);
+            $response->setBody($body);
 
             if ($this->config()->get('add_debug_headers') == true) {
                 $response->addHeader('X-CDN-Domain', $this->config()->get('cdn_domain'));
@@ -109,11 +113,13 @@ class CDNMiddleware implements HTTPMiddleware
      * Check if we're OK to execute
      * @return bool
      */
-    private function canRun()
+    private function canRun($request, $response)
     {
         $confEnabled = $this->config()->get('cdn_rewrite');
         $devEnabled = ((!Director::isDev()) || ($this->config()->get('enable_in_dev')));
-        return ($confEnabled && $devEnabled);
+        $inAdmin = $this->getIsAdmin($request);
+        $adminEnabled = !$inAdmin || ($this->config()->get('enable_in_preview'));
+        return ($confEnabled && $devEnabled && $adminEnabled);
     }
 
 
