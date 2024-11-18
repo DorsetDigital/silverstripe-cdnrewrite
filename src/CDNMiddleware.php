@@ -91,7 +91,7 @@ class CDNMiddleware implements HTTPMiddleware
     {
         $response = $delegate($request);
 
-        if (($response !== null) && ($this->canRun($request, $response) === true)) {
+        if (($response !== null) && ($this->canRun($request) === true)) {
             $response->addHeader('X-CDN-Rewrites', 'Enabled');
 
             $body = $response->getBody() ?: '';
@@ -116,7 +116,7 @@ class CDNMiddleware implements HTTPMiddleware
      * Check if we're OK to execute
      * @return bool
      */
-    private function canRun(HTTPRequest $request, HTTPResponse $response)
+    private function canRun(HTTPRequest $request)
     {
         $confEnabled = $this->config()->get('cdn_rewrite');
         $devEnabled = ((!Director::isDev()) || ($this->config()->get('enable_in_dev')));
