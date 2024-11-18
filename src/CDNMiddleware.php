@@ -90,7 +90,6 @@ class CDNMiddleware implements HTTPMiddleware
     public function process(HTTPRequest $request, callable $delegate)
     {
         $response = $delegate($request);
-        $response->addHeader('X-CDN-Module', 'Installed');
 
         if (($response !== null) && ($this->canRun($request, $response) === true)) {
             $response->addHeader('X-CDN-Rewrites', 'Enabled');
