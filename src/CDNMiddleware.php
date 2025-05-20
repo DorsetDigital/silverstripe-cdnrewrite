@@ -91,7 +91,7 @@ class CDNMiddleware implements HTTPMiddleware
     {
         $response = $delegate($request);
 
-        if (($response !== null) && ($this->canRun($request) === true)) {
+        if (($response !== null) && ($this->canRun($request) === true) && (!$this->getIsXML($response))) {
             $response->addHeader('X-CDN-Rewrites', 'Enabled');
 
             $body = $response->getBody() ?: '';
@@ -129,6 +129,20 @@ class CDNMiddleware implements HTTPMiddleware
         }
 
         return ($confEnabled && $devEnabled && $previewOK && $notAdmin);
+    }
+
+
+    /**
+     * Try to determine if the response is XML / XSL
+     * @param HTTPResponse $response
+     * @return bool
+     */
+    public function getIsXML(HTTPResponse $response) {
+        $ctHeader = $response->getHeader('Content-Type');
+        if (stripos($ctHeader, 'xml') !== false || stripos($ctHeader, 'xsl') !== false) {
+            return true;
+        }
+        return false;
     }
 
 
